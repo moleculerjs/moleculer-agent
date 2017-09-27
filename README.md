@@ -23,6 +23,8 @@
 4. Create a Docker image from project source which starts Moleculer broker without services, except Agent service.
 5. Agent Service Manager (ASM) watches the connected bare nodes and distributes the services by a configuration.
 6. You can dynamically scaling up or down services with Manager or turn on the Autopilot mode.
+7. Agent can update the project repository (pull, checkout by branch, tag, commit hash). Reload all services or reload the process.
+
 
 **Example video how you can start/stop services on remote nodes with agent from Moleculer CLI:**
 [![Video](https://img.youtube.com/vi/2rU0oNOQy-k/maxresdefault.jpg)](https://www.youtube.com/watch?v=2rU0oNOQy-k)
@@ -39,9 +41,9 @@ const { Agent } 		= require("../");
 
 // Create broker
 const broker = new ServiceBroker({
-	nodeID: process.argv[2] || "node-" + process.pid,
-	transporter: "NATS",
-	logger: console
+    nodeID: "node-" + require("os").hostname().toLowerCase() + process.pid,
+    transporter: "NATS",
+    logger: console
 });
 
 broker.createService(Agent);

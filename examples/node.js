@@ -5,7 +5,7 @@ const { Agent } 		= require("../");
 
 // Create broker
 const broker = new ServiceBroker({
-	nodeID: process.argv[2] || "node-" + process.pid,
+	nodeID: process.argv[2] || "node-" + require("os").hostname().toLowerCase() + process.pid,
 	transporter: "NATS",
 	logger: console
 });
