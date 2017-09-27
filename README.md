@@ -25,7 +25,7 @@
 6. You can dynamically scaling up or down services with Manager or turn on the Autopilot mode.
 
 **Example video how you can start/stop services on remote nodes with agent from Moleculer CLI:**
-[Video](https://www.youtube.com/watch?v=2rU0oNOQy-k)
+[![Video](https://img.youtube.com/vi/2rU0oNOQy-k/maxresdefault.jpg)](https://www.youtube.com/watch?v=2rU0oNOQy-k)
 
 ## Usage
 
