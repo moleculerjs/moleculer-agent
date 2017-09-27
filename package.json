@@ -6,9 +6,10 @@
   "scripts": {
     "ci": "jest --watch",
     "coverall": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "demo": "node examples/index.js",
+    "demo:client": "node examples/client.js",
+    "demo:node": "node examples/node.js",
     "deps": "npm-check -u",
-    "dev": "nodemon --debug dev/index.js",
+    "dev": "nodemon --debug examples/dev.js",
     "lint": "eslint --ext=.js src test",
     "lint:fix": "eslint --fix --ext=.js src test",
     "test": "jest --coverage --no-cache"

@@ -49,7 +49,7 @@ module.exports = {
 		 * @returns
 		 */
 		services(ctx) {
-			return Object.values(this.services).map(schema => _.pick(schema, ["name", "version", "settings", "metadata"]));
+			return _.values(this.services).map(schema => _.pick(schema, ["name", "version", "settings", "metadata"]));
 		},
 
 		/**
@@ -98,13 +98,14 @@ module.exports = {
 		 *
 		 * @param {any} ctx
 		 */
-		exitProcess: {
+		quit: {
 			params: {
 				code: { type: "number", optional: true }
 			},
 			handler(ctx) {
 				this.logger.warn("Exit process...");
-				process.exit(ctx.params.code || 0);
+				this.broker.stop()
+					.then(() => process.exit(ctx.params.code || 0));
 			}
 		}
 	},
@@ -134,15 +135,15 @@ module.exports = {
 		 * @param {String} serviceName
 		 */
 		startService(serviceName) {
-			const service = broker.getLocalService(serviceName);
+			const service = this.broker.getLocalService(serviceName);
 			if (service)
 				return;// throw new MoleculerClientError(`The '${serviceName}' service is already running`, 400, null, { service: serviceName });
 
-			const schema = Object.values(this.services).find(schema => schema.name == serviceName);
+			const schema = _.values(this.services).find(schema => schema.name == serviceName);
 			if (!schema)
 				throw new MoleculerClientError(`The '${serviceName}' service is not found`, 400, null, { service: serviceName });
 
-			broker.createService(schema);
+			this.broker.createService(schema);
 		},
 
 		/**
@@ -151,11 +152,11 @@ module.exports = {
 		 * @param {String} serviceName
 		 */
 		stopService(serviceName) {
-			const service = broker.getLocalService(serviceName);
+			const service = this.broker.getLocalService(serviceName);
 			if (!service)
 				throw new MoleculerClientError(`The '${serviceName}' service is not running`, 400, null, { service: serviceName });
 
-			broker.destroyService(service);
+			this.broker.destroyService(service);
 		},
 
 		/**
@@ -163,7 +164,7 @@ module.exports = {
 		 *
 		 */
 		startAllServices() {
-			Object.values(this.services).forEach(schema => {
+			_.forIn(this.services, schema => {
 				try {
 					this.startService(schema.name);
 				} catch(ex) {
@@ -177,7 +178,7 @@ module.exports = {
 		 *
 		 */
 		stopAllServices() {
-			broker.services
+			this.broker.services
 				.filter(service => !/^\$/.test(service.name))
 				.forEach(service => this.stopService(service.name));
 		},
