@@ -10,6 +10,11 @@ const broker = new ServiceBroker({
 	logger: console
 });
 
-broker.createService(Agent);
+broker.createService(Agent, {
+	settings: {
+		serviceFolder: "./examples/services",
+		serviceFileMask: "*.service.js"
+	},
+});
 
 broker.start();

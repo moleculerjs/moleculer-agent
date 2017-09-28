@@ -14,7 +14,9 @@ module.exports = {
 
 	// Default settings
 	settings: {
-		serviceFolder: "./examples"
+		serviceFolder: "./services",
+		serviceFileMask: "*.service.js",
+		watch: false
 	},
 
 	actions: {
@@ -71,6 +73,16 @@ module.exports = {
 		},
 
 		/**
+		 * Refresh available service list
+		 *
+		 * @param {any} ctx
+		 * @returns
+		 */
+		refresh(ctx) {
+			return this.readServiceFolder();
+		},
+
+		/**
 		 * Start a new Moleculer NodeJS process with the same arguments
 		 *
 		 * @param {any} ctx
@@ -90,6 +102,28 @@ module.exports = {
 			},
 			handler(ctx) {
 				return this.execute(ctx.params.cmd, ctx.params.opts || {});
+			}
+		},
+
+		checkout: {
+			params: {
+				commit: { type: "string", optional: true },
+				tag: { type: "string", optional: true },
+				branch: { type: "string", optional: true }
+			},
+			handler(ctx) {
+				const cmds = ["git fetch —all —tags —prune"];
+				//const cmds = [];
+				if (ctx.params.commit)
+					cmds.push(`git checkout ${ctx.params.commit}`);
+				else if (ctx.params.tag)
+					cmds.push(`git checkout tags/${ctx.params.tag}`);
+				else if (ctx.params.branch)
+					cmds.push(`git checkout ${ctx.params.branch}`);
+				else
+					cmds.push(`git checkout master`);
+
+				return this.Promise.map(cmds, cmd => this.execute(cmd));
 			}
 		},
 
@@ -113,12 +147,11 @@ module.exports = {
 	methods: {
 		/**
 		 * Read all services from service folder
-		 *
 		 */
 		readServiceFolder() {
 			const folder = path.resolve(this.settings.serviceFolder);
 			this.logger.info(`Read all services from '${folder}' folder...`);
-			const serviceFiles = glob.sync(path.join(folder, "**", "*.service.js"));
+			const serviceFiles = glob.sync(path.join(folder, "**", this.settings.serviceFileMask));
 			this.services = {};
 			serviceFiles.forEach(file => {
 				const schema = require(file);
@@ -180,7 +213,13 @@ module.exports = {
 		stopAllServices() {
 			this.broker.services
 				.filter(service => !/^\$/.test(service.name))
-				.forEach(service => this.stopService(service.name));
+				.forEach(service => {
+					try {
+						this.stopService(service.name);
+					} catch(ex) {
+						this.logger.warn(ex);
+					}
+				});
 		},
 
 		/**
@@ -207,6 +246,14 @@ module.exports = {
 			});
 		},
 
+		/**
+		 * Spawn a child process
+		 *
+		 * @param {String} command
+		 * @param {Array<String>} args
+		 * @param {Object} opts
+		 * @returns {ChildProcess}
+		 */
 		spawn(command, args, opts) {
 			this.logger.info("Spawn a new process.", command, args);
 			return Spawn(command, args, opts);
