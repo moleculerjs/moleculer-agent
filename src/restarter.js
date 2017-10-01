@@ -2,13 +2,15 @@
 
 const Spawn	= require("child_process").spawn;
 
-console.log("Arguments:", process.argv);
+setTimeout(() => {
 
-const args = [...process.execArgv, ...process.argv.slice(2)];
-console.log(`Start Agent...`, args);
-const proc = Spawn(process.execPath, args, { detached: true, stdio: "ignore" });
-proc.unref();
+	const args = [...process.execArgv, ...process.argv.slice(2)];
+	console.log(`Start Agent...`, args);
+	const proc = Spawn(process.execPath, args, { detached: true, stdio: "ignore" });
+	proc.unref();
 
-console.log("Exit restarter...");
+	console.log("Exit restarter...");
 
-process.exit(0);
+	process.exit(0);
+
+}, 2000);

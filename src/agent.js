@@ -16,6 +16,8 @@ module.exports = {
 	settings: {
 		serviceFolder: "./services",
 		serviceFileMask: "*.service.js",
+
+		// TODO
 		watch: false
 	},
 
@@ -148,12 +150,12 @@ module.exports = {
 		 *
 		 * @param {any} ctx
 		 */
-		quit: {
+		exit: {
 			params: {
 				code: { type: "number", optional: true }
 			},
 			handler(ctx) {
-				this.quit(ctx.params.code);
+				this.exitProcess(ctx.params.code);
 			}
 		},
 
@@ -272,11 +274,11 @@ module.exports = {
 		},
 
 		/**
-		 * Quit the current process
+		 * Exit the current process
 		 *
 		 * @returns
 		 */
-		quit(code) {
+		exitProcess(code) {
 			this.logger.warn("Exit process...");
 			return this.broker.stop()
 				.then(() => process.exit(code || 0));
@@ -321,7 +323,6 @@ module.exports = {
 
 		/**
 		 * Restart the current process
-		 *
 		 */
 		restart() {
 			const args = [...process.execArgv, path.join(__dirname, "restarter.js"), ...process.argv.slice(1)];
@@ -329,7 +330,7 @@ module.exports = {
 			proc.unref();
 			this.logger.info(`Restarter started. PID: ${proc.pid}`);
 
-			this.quit(0);
+			this.exitProcess(0);
 		}
 	},
 
